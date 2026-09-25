@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a3a6b">
+<title>本日のFaith｜フェイスアップ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:wght@700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Noto Sans JP',sans-serif;background:#f4f6fb;color:#1a1a2e;font-size:14px;min-height:100vh}
+.wrap{max-width:520px;margin:0 auto;padding:0 12px calc(28px + env(safe-area-inset-bottom))}
+.top{background:#1a3a6b;color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;margin:0 -12px 14px;display:flex;justify-content:space-between;align-items:baseline}
+.top .mark{font-family:'Playfair Display',serif;font-size:22px;letter-spacing:1.5px}
+.top .sub{font-size:11px;color:rgba(255,255,255,.8)}
+
+/* 部門切替 */
+.seg{display:flex;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:12px}
+.seg button{flex:1;padding:10px;border:none;background:#fff;color:#1a3a6b;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.seg button.on{background:#1a3a6b;color:#fff}
+
+/* 本日のFaithカード（index.html と同一） */
+@keyframes faithIn{0%{opacity:0;transform:translateY(-20px) scale(.95)}60%{opacity:1;transform:translateY(4px) scale(1.01)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes faithGlow{0%{box-shadow:0 0 0 0 rgba(240,192,64,.9),0 4px 20px rgba(26,58,107,.3)}40%{box-shadow:0 0 0 12px rgba(240,192,64,.3),0 4px 20px rgba(26,58,107,.3)}100%{box-shadow:0 0 0 20px rgba(240,192,64,0),0 4px 20px rgba(26,58,107,0)}}
+.faith-card-anim{animation:faithIn .6s cubic-bezier(.22,1,.36,1) both,faithGlow 2s ease-in-out .5s infinite}
+.fcard{border-radius:10px;overflow:hidden;margin-bottom:12px}
+.fcard .hd{padding:8px 14px;display:flex;justify-content:space-between;align-items:center}
+.fcard .bd{background:rgba(255,255,255,.2);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.fcard .dt{color:rgba(255,255,255,.9);font-size:12px;font-weight:600}
+.fcard .in{background:#fff;margin:0 10px 10px;border-radius:7px;padding:14px 16px}
+.fcard .cat{font-size:11px;color:#888;margin-bottom:3px;min-height:1em}
+.fcard .ttl{font-size:19px;font-weight:700;color:#1a3a6b;margin-bottom:10px;line-height:1.4}
+.fcard .txt{font-size:14.5px;color:#444;line-height:1.9;border-left:3px solid #1a3a6b;padding-left:12px}
+
+/* 日送り */
+.nav{display:flex;gap:8px;margin-bottom:14px}
+.nav button{flex:1;padding:11px 0;border:1px solid #d5ddec;border-radius:10px;background:#fff;color:#1a3a6b;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nav button:active{background:#e8eef9}
+.nav button.today{background:#1a3a6b;color:#fff;border-color:#1a3a6b}
+.nav button:disabled{opacity:.45;cursor:default}
+
+/* 一覧 */
+.sec{border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.sec-h{width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#1a3a6b;color:#fff;border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.sec-h .ar{font-size:12px;color:rgba(255,255,255,.75);transition:transform .2s}
+.sec-h[aria-expanded="true"] .ar{transform:rotate(180deg)}
+.list{display:none;padding:6px}
+.list.open{display:block}
+.row{width:100%;display:flex;align-items:center;gap:10px;padding:10px 8px;border:none;border-bottom:1px solid #eef1f7;background:#fff;text-align:left;font-family:inherit;cursor:pointer;color:#1a1a2e}
+.row:last-child{border-bottom:none}
+.row .d{flex:0 0 34px;font-size:13px;font-weight:700;color:#1a3a6b;text-align:right}
+.row .b{flex:0 0 auto;font-size:10px;font-weight:700;color:#fff;background:#1a3a6b;border-radius:20px;padding:2px 8px;white-space:nowrap}
+.row .t{flex:1;font-size:13px;line-height:1.5}
+.row.cur{background:#eef3fc}
+.row.istoday .d::after{content:'●';color:#f0c040;font-size:8px;margin-left:2px;vertical-align:super}
+
+.warn{background:#fff7e0;border:1px solid #f0c040;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.8;color:#5a4500;margin-bottom:12px}
+.ns-row{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.ns-h{font-size:14px;font-weight:700;color:#1a3a6b;margin-bottom:6px}
+.ns-t{font-size:13.5px;line-height:1.85;color:#444}
+button:focus-visible{outline:3px solid #f0c040;outline-offset:2px}
+/* タブレット（Fire等）：横幅を広げ、文字を読みやすく */
+@media (min-width:700px){.wrap{max-width:760px;padding-left:20px;padding-right:20px}.top{margin-left:-20px;margin-right:-20px;padding-left:24px;padding-right:24px}.top .mark{font-size:26px}.top .sub{font-size:13px}.seg button,.nav button{font-size:15px;padding-top:13px;padding-bottom:13px}.fcard .in{padding:20px 24px}.fcard .cat{font-size:13px}.fcard .ttl{font-size:24px}.fcard .txt{font-size:17px;line-height:2}.row .t{font-size:15px}.row .d{font-size:15px;flex-basis:40px}}
+@media (prefers-reduced-motion:reduce){.faith-card-anim{animation:none}.sec-h .ar{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><span class="mark">Faith</span><span class="sub" id="topDate"></span></div>
+
+  <div class="seg" role="group" aria-label="部門の切替">
+    <button type="button" id="segFront" class="on" onclick="setDept('front')">フロント</button>
+    <button type="button" id="segBf" onclick="setDept('breakfast')">朝食</button>
+  </div>
+
+  <div id="faithTodayMount" aria-live="polite"></div>
+  <noscript>
+  <div class="warn">この開き方ではJavaScriptが動かないため、「本日のFaith」を自動表示できません。<br>Silkブラウザのアドレス欄に Netlify のURL（…/faith-rinen.html）を入力して開いてください。<br>下に1か月分を一覧で表示しています。</div>
+  <div class="ns"><div class="ns-row"><div class="ns-h">1日　経営理念｜私たちの使命</div><div class="ns-t">私たちは、「時代を先取りする創造的なホテル運営・コンサルティング事業」を通じ、お客様の活力ある社会活動・経済活動をお手伝いし、地域社会に貢献します。</div></div><div class="ns-row"><div class="ns-h">2日　経営理念｜私たちの目標</div><div class="ns-t">私たちは、「安全・清潔・ぐっすり眠れる」ロハスな空間を創造し、世界的レベルでの質の高いサービスを提供し、顧客満足度日本一のビジネスホテルを目指します。</div></div><div class="ns-row"><div class="ns-h">3日　経営理念｜行動指針 1・2</div><div class="ns-t">1. 私たちは、心のこもったおもてなしで、お客様に&quot;日常の感動&quot;をお届けします。2. 私たちは、自律型感動人間を目指し、感性と人間力を磨き続けます。</div></div><div class="ns-row"><div class="ns-h">4日　経営理念｜行動指針 3・4</div><div class="ns-t">3. 私たちは、お客様・ビジネスパートナー・働く仲間との相互信頼関係を深めます。4. 私たちは、スピード・スピード・スピードで、積極的に改善・改革を行います。</div></div><div class="ns-row"><div class="ns-h">5日　経営理念｜行動指針 5・6</div><div class="ns-t">5. 私たちは、社会的倫理観・常識・良識・品位を持って行動し、法令を遵守します。6. 会社は、皆さんと家族の幸せを追求し、一人一人の夢の実現を支援します。</div></div><div class="ns-row"><div class="ns-h">6日　自律型感動人間</div><div class="ns-t">私たちはFaithを深く理解し、日々実践すると共に、お客様と働く仲間に感謝と感動の気持ちを持って接します。自らの可能性を信じ、自責で考えることによって、人間的成長を求め続けます。</div></div><div class="ns-row"><div class="ns-h">7日　環境理念｜エコ・ファーストの約束</div><div class="ns-t">私たちは、エコ・ファースト企業の一員として、①事業活動におけるCO₂排出量の削減、②循環型社会の構築や生物多様性の推進に協力、③環境意識向上に努め、社会貢献活動を推進します。</div></div><div class="ns-row"><div class="ns-h">8日　コンセプト｜Natural・Organic・Smart</div><div class="ns-t">私たちは、Lohas - Lifestyles of Health and Sustainability - をコンセプトとし Natural（自然活用・天然温泉）, Organic（地元有機野菜の朝食）, Smart（気の利いたシンプルさと心からのおもてなし）なホテルを目指します。</div></div><div class="ns-row"><div class="ns-h">9日　サービス スタンダード 1｜身だしなみ</div><div class="ns-t">私たちは、お客様に好感を持たれるよう、身だしなみを整えます。</div></div><div class="ns-row"><div class="ns-h">10日　サービス スタンダード 2｜お名前呼び</div><div class="ns-t">私たちは、お客様への感動のおもてなし準備を実行し、お名前をお呼びします。</div></div><div class="ns-row"><div class="ns-h">11日　サービス スタンダード 3｜笑顔でお出迎え</div><div class="ns-t">私たちは、お出迎えの際は、満面の笑顔で「おかえりなさいませ」とお声掛けします。</div></div><div class="ns-row"><div class="ns-h">12日　サービス スタンダード 4｜先読みのサービス</div><div class="ns-t">私たちは、お客様お一人お一人のニーズを先読みし、プラスαの一言をきっかけに日常の感動を深めます。</div></div><div class="ns-row"><div class="ns-h">13日　サービス スタンダード 5｜エレベーター案内</div><div class="ns-t">私たちは、お客様の一歩前に歩み寄り、エレベーター前までのご案内を徹底し、「ごゆっくりお過ごしくださいませ」とお見送りします。</div></div><div class="ns-row"><div class="ns-h">14日　サービス スタンダード 6｜朝の笑顔</div><div class="ns-t">私たちは、お客様に、朝は明るい笑顔と元気な声で「おはようございます」、朝食後とお出掛けの際は「いってらっしゃいませ」とお声掛けします。</div></div><div class="ns-row"><div class="ns-h">15日　サービス スタンダード 7｜ラッキーコール</div><div class="ns-t">私たちは、お客様の声を何よりも大切にし、理念に沿ってラッキーコールとご要望にお応えします。</div></div><div class="ns-row"><div class="ns-h">16日　行動基準 1｜お客様の声</div><div class="ns-t">私たちはお客様の声を何よりも大切にし、それにお応えする事を使命と考えます。お客様からの改善案（苦情・要望）を歓迎し、言い訳や責任転嫁をせず、責任を持って真摯に取り組みます。</div></div><div class="ns-row"><div class="ns-h">17日　行動基準 2｜オーナー様との信頼関係</div><div class="ns-t">スーパーホテルが堅実経営して発展し続けることが、信頼関係につながります。私たちは、建物の維持保全に努め、高い稼働率でホテル運営を行います。</div></div><div class="ns-row"><div class="ns-h">18日　行動基準 3｜安全・ぐっすり</div><div class="ns-t">お客様に安心して、ぐっすり眠っていただくことが私たちの大切な使命です。常日頃、設備の維持や防犯・防災に心掛けるとともに、非常時にはお客様の安全を第一に考えた責任ある行動を取ります。</div></div><div class="ns-row"><div class="ns-h">19日　行動基準 4｜クリンネス</div><div class="ns-t">お客様に清潔な宿泊スペースをご提供するのが、私たちの使命です。清掃チェックとビジネスパートナーとの対話を徹底し、髪の毛・ホコリ・臭いのない卓越した清潔さを追求します。</div></div><div class="ns-row"><div class="ns-h">20日　行動基準 5｜創意工夫・継続改善</div><div class="ns-t">業界のリーディングホテルとして、お客様に愛されるホテルであるために、従来のやり方や常識にとらわれることなく、継続的改善を行うことにより、サービス向上・コスト削減・業務効率化に努めます。</div></div><div class="ns-row"><div class="ns-h">21日　行動基準 6｜エンパワーメント</div><div class="ns-t">スーパーホテルで一番大切なのは、店舗でお客様により良いサービスを提供することです。私たち一人ひとりには自分で判断し、行動する力が与えられています。</div></div><div class="ns-row"><div class="ns-h">22日　行動基準 7｜チームワーク</div><div class="ns-t">お客様のご満足を高め、更なるご要望にお応えするために、チームワークを常に意識し、仕事の内容やセクションを超えて幅広く協力し合っていきます。</div></div><div class="ns-row"><div class="ns-h">23日　行動基準 8｜コミュニケーション</div><div class="ns-t">コミュニケーションの基本は相手の話を「聴く」ことです。自分と異なる意見や考えを素直に受け止めます。提案や要望に対しては、必ず応えます。コミュニケーションが相互の理解と信頼を高め、チームワークを強め、理念の実現を可能なものにしていきます。</div></div><div class="ns-row"><div class="ns-h">24日　行動基準 9｜品位</div><div class="ns-t">スーパーホテルのイメージを作り出すのも私たちの役目です。スーパーホテルの一員であることに誇りを持って、お客様や働く仲間を尊敬し、品位を持って接します。</div></div><div class="ns-row"><div class="ns-h">25日　行動基準 10｜身だしなみ</div><div class="ns-t">私たちは、スーパーホテルの一員として、身だしなみマニュアルに従って、お客様に好感を持たれる身だしなみを整えます。</div></div><div class="ns-row"><div class="ns-h">26日　行動基準 11｜スピード・スピード・スピード</div><div class="ns-t">業務遂行に当たっては、スピードを重視します。状況は常に変化しているので、情報は素早く伝達します。よいと思ったことは、即実行の習慣を身に着けます。</div></div><div class="ns-row"><div class="ns-h">27日　行動基準 12｜学習</div><div class="ns-t">私たちは、プロフェッショナルとして成長するための努力を怠りません。学習する組織風土を創り、情報の共有化と対話を通じて、知の創造と共有を図ります。常に安定した最高のサービスを提供できるよう自己研鑽に励みます。</div></div><div class="ns-row"><div class="ns-h">28日　行動基準 13｜Lohas</div><div class="ns-t">Lohasを提案するホテルの一員として、私たち一人ひとりが健康と環境に配慮したライフスタイルを送ります。</div></div><div class="ns-row"><div class="ns-h">29日　SDGs No.①〜⑥｜SDGs ①〜⑥</div><div class="ns-t">①貧困をなくそう：未使用ノートを子どもたちへ寄付。②飢餓をゼロに：朝食廃棄をたい肥化。③健康と福祉：免疫力活性化・ぐっすりへのこだわり・オーガニック朝食。④質の高い教育：きしゃぽん。⑤ジェンダー平等：えるぼし三ツ星認定。⑥安全な水：MICA加工の健康イオン水・Natural Water+Silica。</div></div><div class="ns-row"><div class="ns-h">30日　SDGs No.⑦〜⑫｜SDGs ⑦〜⑫</div><div class="ns-t">⑦エネルギー：SHのメガソーラー事業。⑧働きがい：スーパーホテルクリーン・海外人材登用。⑨産業と技術革新。⑩人や国の不平等を無くそう。⑪まちづくり：地域へ貢献できる出店。⑫つかう責任：エコチェックイン・古着deワクチンプラン。</div></div><div class="ns-row"><div class="ns-h">31日　SDGs No.⑬〜⑰｜SDGs ⑬〜⑰</div><div class="ns-t">⑬気候変動：エコ泊・エコひいき。⑭海の豊かさ：オーガニックアメニティ・バイオマスインク使用。⑮陸の豊かさ：天然素材アロマ・国産木材の活用。⑯平和と公正：おりづる再生プロジェクト。⑰パートナーシップ：岐阜県東白川村の東濃ヒノキ活用・泊食分離プラン地元飲食店コラボ。</div></div></div>
+  </noscript>
+
+
+  <div class="nav">
+    <button type="button" onclick="moveDay(-1)">◀ 前の日</button>
+    <button type="button" class="today" id="btnToday" onclick="goToday()">今日に戻る</button>
+    <button type="button" onclick="moveDay(1)">次の日 ▶</button>
+  </div>
+
+  <div class="sec">
+    <button type="button" class="sec-h" id="listHdr" aria-expanded="false" onclick="toggleList()"><span id="listTtl">1か月のFaith一覧</span><span class="ar">▼</span></button>
+    <div class="list" id="faithList"></div>
+  </div>
+</div>
+
+<script>
+// ===== データ（index.html から抽出・原文のまま） =====
+var FAITH_SCHEDULE = [
+  // 1〜8日: 経営理念・行動指針・自律型感動人間・環境理念・コンセプト
+  {day:1,  cat:'経営理念', badge:'理念', title:'私たちの使命', body:'私たちは、「時代を先取りする創造的なホテル運営・コンサルティング事業」を通じ、お客様の活力ある社会活動・経済活動をお手伝いし、地域社会に貢献します。'},
+  {day:2,  cat:'経営理念', badge:'理念', title:'私たちの目標', body:'私たちは、「安全・清潔・ぐっすり眠れる」ロハスな空間を創造し、世界的レベルでの質の高いサービスを提供し、顧客満足度日本一のビジネスホテルを目指します。'},
+  {day:3,  cat:'経営理念', badge:'理念', title:'行動指針 1・2', body:'1. 私たちは、心のこもったおもてなしで、お客様に"日常の感動"をお届けします。2. 私たちは、自律型感動人間を目指し、感性と人間力を磨き続けます。'},
+  {day:4,  cat:'経営理念', badge:'理念', title:'行動指針 3・4', body:'3. 私たちは、お客様・ビジネスパートナー・働く仲間との相互信頼関係を深めます。4. 私たちは、スピード・スピード・スピードで、積極的に改善・改革を行います。'},
+  {day:5,  cat:'経営理念', badge:'理念', title:'行動指針 5・6', body:'5. 私たちは、社会的倫理観・常識・良識・品位を持って行動し、法令を遵守します。6. 会社は、皆さんと家族の幸せを追求し、一人一人の夢の実現を支援します。'},
+  {day:6,  cat:'自律型感動人間', badge:'理念', title:'自律型感動人間', body:'私たちはFaithを深く理解し、日々実践すると共に、お客様と働く仲間に感謝と感動の気持ちを持って接します。自らの可能性を信じ、自責で考えることによって、人間的成長を求め続けます。'},
+  {day:7,  cat:'環境理念', badge:'理念', title:'エコ・ファーストの約束', body:'私たちは、エコ・ファースト企業の一員として、①事業活動におけるCO₂排出量の削減、②循環型社会の構築や生物多様性の推進に協力、③環境意識向上に努め、社会貢献活動を推進します。'},
+  {day:8,  cat:'コンセプト', badge:'理念', title:'Natural・Organic・Smart', body:'私たちは、Lohas - Lifestyles of Health and Sustainability - をコンセプトとし Natural（自然活用・天然温泉）, Organic（地元有機野菜の朝食）, Smart（気の利いたシンプルさと心からのおもてなし）なホテルを目指します。'},
+  // 9〜15日: SS1〜SS7
+  {day:9,  cat:'サービス スタンダード 1', badge:'SS', title:'身だしなみ', body:'私たちは、お客様に好感を持たれるよう、身だしなみを整えます。'},
+  {day:10, cat:'サービス スタンダード 2', badge:'SS', title:'お名前呼び', body:'私たちは、お客様への感動のおもてなし準備を実行し、お名前をお呼びします。'},
+  {day:11, cat:'サービス スタンダード 3', badge:'SS', title:'笑顔でお出迎え', body:'私たちは、お出迎えの際は、満面の笑顔で「おかえりなさいませ」とお声掛けします。'},
+  {day:12, cat:'サービス スタンダード 4', badge:'SS', title:'先読みのサービス', body:'私たちは、お客様お一人お一人のニーズを先読みし、プラスαの一言をきっかけに日常の感動を深めます。'},
+  {day:13, cat:'サービス スタンダード 5', badge:'SS', title:'エレベーター案内', body:'私たちは、お客様の一歩前に歩み寄り、エレベーター前までのご案内を徹底し、「ごゆっくりお過ごしくださいませ」とお見送りします。'},
+  {day:14, cat:'サービス スタンダード 6', badge:'SS', title:'朝の笑顔', body:'私たちは、お客様に、朝は明るい笑顔と元気な声で「おはようございます」、朝食後とお出掛けの際は「いってらっしゃいませ」とお声掛けします。'},
+  {day:15, cat:'サービス スタンダード 7', badge:'SS', title:'ラッキーコール', body:'私たちは、お客様の声を何よりも大切にし、理念に沿ってラッキーコールとご要望にお応えします。'},
+  // 16〜28日: 行動基準1〜13
+  {day:16, cat:'行動基準 1',  badge:'行動', title:'お客様の声', body:'私たちはお客様の声を何よりも大切にし、それにお応えする事を使命と考えます。お客様からの改善案（苦情・要望）を歓迎し、言い訳や責任転嫁をせず、責任を持って真摯に取り組みます。'},
+  {day:17, cat:'行動基準 2',  badge:'行動', title:'オーナー様との信頼関係', body:'スーパーホテルが堅実経営して発展し続けることが、信頼関係につながります。私たちは、建物の維持保全に努め、高い稼働率でホテル運営を行います。'},
+  {day:18, cat:'行動基準 3',  badge:'行動', title:'安全・ぐっすり', body:'お客様に安心して、ぐっすり眠っていただくことが私たちの大切な使命です。常日頃、設備の維持や防犯・防災に心掛けるとともに、非常時にはお客様の安全を第一に考えた責任ある行動を取ります。'},
+  {day:19, cat:'行動基準 4',  badge:'行動', title:'クリンネス', body:'お客様に清潔な宿泊スペースをご提供するのが、私たちの使命です。清掃チェックとビジネスパートナーとの対話を徹底し、髪の毛・ホコリ・臭いのない卓越した清潔さを追求します。'},
+  {day:20, cat:'行動基準 5',  badge:'行動', title:'創意工夫・継続改善', body:'業界のリーディングホテルとして、お客様に愛されるホテルであるために、従来のやり方や常識にとらわれることなく、継続的改善を行うことにより、サービス向上・コスト削減・業務効率化に努めます。'},
+  {day:21, cat:'行動基準 6',  badge:'行動', title:'エンパワーメント', body:'スーパーホテルで一番大切なのは、店舗でお客様により良いサービスを提供することです。私たち一人ひとりには自分で判断し、行動する力が与えられています。'},
+  {day:22, cat:'行動基準 7',  badge:'行動', title:'チームワーク', body:'お客様のご満足を高め、更なるご要望にお応えするために、チームワークを常に意識し、仕事の内容やセクションを超えて幅広く協力し合っていきます。'},
+  {day:23, cat:'行動基準 8',  badge:'行動', title:'コミュニケーション', body:'コミュニケーションの基本は相手の話を「聴く」ことです。自分と異なる意見や考えを素直に受け止めます。提案や要望に対しては、必ず応えます。コミュニケーションが相互の理解と信頼を高め、チームワークを強め、理念の実現を可能なものにしていきます。'},
+  {day:24, cat:'行動基準 9',  badge:'行動', title:'品位', body:'スーパーホテルのイメージを作り出すのも私たちの役目です。スーパーホテルの一員であることに誇りを持って、お客様や働く仲間を尊敬し、品位を持って接します。'},
+  {day:25, cat:'行動基準 10', badge:'行動', title:'身だしなみ', body:'私たちは、スーパーホテルの一員として、身だしなみマニュアルに従って、お客様に好感を持たれる身だしなみを整えます。'},
+  {day:26, cat:'行動基準 11', badge:'行動', title:'スピード・スピード・スピード', body:'業務遂行に当たっては、スピードを重視します。状況は常に変化しているので、情報は素早く伝達します。よいと思ったことは、即実行の習慣を身に着けます。'},
+  {day:27, cat:'行動基準 12', badge:'行動', title:'学習', body:'私たちは、プロフェッショナルとして成長するための努力を怠りません。学習する組織風土を創り、情報の共有化と対話を通じて、知の創造と共有を図ります。常に安定した最高のサービスを提供できるよう自己研鑽に励みます。'},
+  {day:28, cat:'行動基準 13', badge:'行動', title:'Lohas', body:'Lohasを提案するホテルの一員として、私たち一人ひとりが健康と環境に配慮したライフスタイルを送ります。'},
+  // 29〜31日: SDGs
+  {day:29, cat:'SDGs No.①〜⑥', badge:'SDGs', title:'SDGs ①〜⑥',
+   body:'①貧困をなくそう：未使用ノートを子どもたちへ寄付。②飢餓をゼロに：朝食廃棄をたい肥化。③健康と福祉：免疫力活性化・ぐっすりへのこだわり・オーガニック朝食。④質の高い教育：きしゃぽん。⑤ジェンダー平等：えるぼし三ツ星認定。⑥安全な水：MICA加工の健康イオン水・Natural Water+Silica。'},
+  {day:30, cat:'SDGs No.⑦〜⑫', badge:'SDGs', title:'SDGs ⑦〜⑫',
+   body:'⑦エネルギー：SHのメガソーラー事業。⑧働きがい：スーパーホテルクリーン・海外人材登用。⑨産業と技術革新。⑩人や国の不平等を無くそう。⑪まちづくり：地域へ貢献できる出店。⑫つかう責任：エコチェックイン・古着deワクチンプラン。'},
+  {day:31, cat:'SDGs No.⑬〜⑰', badge:'SDGs', title:'SDGs ⑬〜⑰',
+   body:'⑬気候変動：エコ泊・エコひいき。⑭海の豊かさ：オーガニックアメニティ・バイオマスインク使用。⑮陸の豊かさ：天然素材アロマ・国産木材の活用。⑯平和と公正：おりづる再生プロジェクト。⑰パートナーシップ：岐阜県東白川村の東濃ヒノキ活用・泊食分離プラン地元飲食店コラボ。'}
+];
+
+var BFAITH=[
+  {d:1,b:'朝食理念',t:'朝食理念',c:'日の始まりにお客様が一番最初に会うのが私達です。明るい笑顔と元気なご挨拶でお客様を元気にお見送りしましょう。'},
+  {d:2,b:'朝食理念',t:'おはようの3つの意味',c:'①お客様の目覚めがすっきりする ②お客様の朝食に気持ちを込める ③お客様に今日一日の元気を送る'},
+  {d:3,b:'行動指針',t:'行動指針①②',c:'①CKシートに従い身だしなみを整えます。②明るい笑顔と元気な声でご挨拶をします。'},
+  {d:4,b:'行動指針',t:'行動指針③④',c:'③食品類は賞味期限の近いものから使用し適切な量の補充を行います。④最終チェック時に検食を行い保温状態を確認します。'},
+  {d:5,b:'行動指針',t:'行動指針⑤⑥',c:'⑤手すきの際には盛り付け直しを行い見栄えと異物混入の確認をします。⑥提供台・返却台・テーブルが汚れていないか、POPが見える位置に設置されているか確認します。'},
+  {d:6,b:'行動指針',t:'行動指針⑦',c:'⑦衛生管理（HACCP）に則った片づけを行うと共に、メニュー毎の廃棄量を確認します。フードロス削減に取り組みます。'},
+  {d:7,b:'お出迎え',t:'お出迎え',c:'アイコンタクトを取りながら元気なご挨拶をしましょう。お一人お一人に笑顔でおはようございます！ プラスα例：「○○様昨日はぐっすりお休みいただけましたか？」「本日のメインメニューは○○です。」'},
+  {d:8,b:'接客',t:'補充時・トレー返却時',c:'お客様のパーソナルスペースに入る時は「失礼します」「後ろ失礼します」などお声がけしましょう。プラスα：「ご返却ありがとうございます。」「お口に合いましたでしょうか？」'},
+  {d:9,b:'接客',t:'朝食終了のお声がけ',c:'「お食事中失礼いたします。本日の朝食時間は○時で終了でございます。お食事・お飲み物のおかわりがございましたらお早めにお取りいただきます様お願いいたします。どうぞお時間になるまでごゆっくりお召し上がりくださいませ！」'},
+  {d:10,b:'接客',t:'お見送り',c:'「本日もお元気にいってらっしゃいませ。またのおかえりをお待ちしております。」心を込めて玄関・エレベーター前までお見送りをしましょう。'},
+  {d:11,b:'朝食Faith',t:'エンパワーメント',c:'スーパーホテルで一番大切なのは、お客様により良いサービスを提供することです。私達一人ひとりには自分で判断し、行動する力が与えられています。'},
+  {d:12,b:'朝食Faith',t:'チームワーク',c:'お客様のご満足を高め、さらなるご要望にお応えするために、チームワークを常に意識し、全体的な視野で物事をとらえ、行動します。'},
+  {d:13,b:'朝食Faith',t:'コミュニケーション',c:'コミュニケーションの基本は相手の話を「聴く」ことです。自分と異なる意見や考えを素直に受け止めます。コミュニケーションが相互の理解と信頼を高め、理念の実現を可能なものにしていきます。'},
+  {d:14,b:'朝食Faith',t:'品位',c:'スーパーホテルのイメージを作り出すのも私達の役目です。一員であることに誇りを持って、お客様や働く仲間を尊敬し、品位を持って接します。'},
+  {d:15,b:'朝食Faith',t:'スピード・スピード・スピード',c:'業務遂行に当たっては、スピードを重視します。状況は常に変化しているので、情報は素早く伝達します。よいと思ったことは、即実行の習慣を身に着けます。'},
+  {d:16,b:'朝食Faith',t:'学習',c:'私達は、プロフェッショナルとして成長する為の努力を怠りません。学習する組織風土を創り、情報の共有化と対話を通じて、知の創造と共有を図ります。'},
+  {d:17,b:'オーガニック',t:'オーガニック朝食の訴求',c:'オーガニック野菜サラダはミネラルたっぷり。老舗ヒカリ味噌と共同開発の有機大豆味噌。ソーセージ・スクランブルエッグには有機ケチャップ。有機納豆・無添加味付けのり。着色料・保存料不使用の焼き立てパン。'},
+  {d:18,b:'SDGs朝食',t:'朝食とSDGs②飢餓をゼロに',c:'自然に頼った栽培を行うオーガニックは、土地の質を改善し、生態系を壊すことなく農産物を収穫できるため、持続可能な農業を促進することにつながります。'},
+  {d:19,b:'SDGs朝食',t:'朝食とSDGs⑦⑧',c:'⑦エネルギー：距離の近い地域の食材ほど余計なエネルギー消費をしなくなります。⑧働きがい：地元とのつながりは地方の文化振興や働きがいへとつながります。'},
+  {d:20,b:'SDGs朝食',t:'朝食とSDGs⑪⑫',c:'⑪まちづくり：地元食材の使用による地域活性化や間伐材の備品使用による農村部間の良好なつながりを支援します。⑫つかう責任：適正量の発注でフードロスを減らします。リサイクル食器の活用もこの目標への取り組みです。'},
+  {d:21,b:'朝食理念',t:'朝食理念（振り返り）',c:'日の始まりにお客様が一番最初に会うのが私達です。明るい笑顔と元気なご挨拶で、お客様を元気にお見送りしましょう。'},
+  {d:22,b:'行動指針',t:'行動指針①②（再確認）',c:'①CKシートに従い身だしなみを整えます。②明るい笑顔と元気な声でご挨拶をします。'},
+  {d:23,b:'行動指針',t:'行動指針③④（再確認）',c:'③食品類は賞味期限の近いものから使用し適切な補充を。④最終チェック時に検食・保温状態確認。'},
+  {d:24,b:'行動指針',t:'行動指針⑤⑥（再確認）',c:'⑤手すきの際には盛り付け直し・見栄え確認。⑥提供台・返却台・テーブルの清潔確認。'},
+  {d:25,b:'行動指針',t:'行動指針⑦（再確認）',c:'⑦衛生管理（HACCP）に則った片づけを行い、メニュー毎の廃棄量を確認します。'},
+  {d:26,b:'お出迎え',t:'お出迎え（再確認）',c:'アイコンタクトを取りながら元気なご挨拶。「おはようございます！」プラスα：「○○様昨日はぐっすりお休みいただけましたか？」'},
+  {d:27,b:'接客',t:'補充時・トレー返却時（再確認）',c:'「失礼します」「後ろ失礼します」などお声がけ。「フードロスを出さないために少しずつ補充をしております。ご協力ありがとうございます。」'},
+  {d:28,b:'接客',t:'朝食終了・お見送り（再確認）',c:'「本日の朝食時間は○時で終了でございます。どうぞごゆっくりお召し上がりくださいませ！本日もお元気にいってらっしゃいませ。またのおかえりをお待ちしております。」'},
+  {d:29,b:'朝食Faith',t:'エンパワーメント（再確認）',c:'私達一人ひとりには自分で判断し、行動する力が与えられています。お客様のご要望や問題に対処し、お客様満足度を高め、良好な関係を築いていきます。'},
+  {d:30,b:'朝食Faith',t:'チームワーク（再確認）',c:'チームワークを常に意識し、全体的な視野で物事をとらえ、行動します。'},
+  {d:31,b:'朝食理念',t:'おはようの3つの意味（再確認）',c:'①お客様の目覚めがすっきりする ②朝食に気持ちを込める ③今日一日の元気を送る。心を込めた挨拶を大切に。'}
+];
+
+// ===== 表示ロジック =====
+var viewDate=new Date();
+var dept='front';
+try{ if(/[?&]dept=breakfast/.test(location.search)) dept='breakfast'; }catch(e){}
+
+var sdgsColors=['#e5243b','#dda63a','#4c9f38','#c5192d','#ff3a21','#26bde2','#fcc30b','#a21942','#fd6925','#dd1367','#fd9d24','#bf8b2e','#3f7e44','#0a97d9','#56c02b','#00689d','#19486a'];
+var kodoBgMap={1:'linear-gradient(135deg,#1a3a6b 0%,#8b1a2e 100%)',2:'linear-gradient(135deg,#1a3a6b 0%,#8b1a2e 100%)',3:'linear-gradient(135deg,#1a2d5a 0%,#7a2040 100%)',4:'linear-gradient(135deg,#1a2d5a 0%,#7a2040 100%)',5:'linear-gradient(135deg,#162448 0%,#c0392b 100%)',6:'linear-gradient(135deg,#162448 0%,#c0392b 100%)',7:'linear-gradient(135deg,#1a3a6b 0%,#922b21 100%)',8:'linear-gradient(135deg,#1a3a6b 0%,#922b21 100%)',9:'linear-gradient(135deg,#152040 0%,#a93226 100%)',10:'linear-gradient(135deg,#152040 0%,#a93226 100%)',11:'linear-gradient(135deg,#1a3a6b 0%,#8b1a2e 100%)',12:'linear-gradient(135deg,#1a3a6b 0%,#8b1a2e 100%)',13:'linear-gradient(135deg,#162448 0%,#c0392b 100%)'};
+var breakfastBgMap={
+  '朝食理念':'linear-gradient(135deg,#9b2c6e 0%,#c5478a 100%)',
+  '行動指針':'linear-gradient(135deg,#c0392b 0%,#e67e22 100%)',
+  'お出迎え':'linear-gradient(135deg,#27ae60 0%,#2ecc71 100%)',
+  '接客':'linear-gradient(135deg,#2980b9 0%,#3498db 100%)',
+  '朝食Faith':'linear-gradient(135deg,#8e44ad 0%,#9b59b6 100%)',
+  'オーガニック':'linear-gradient(135deg,#16a085 0%,#1abc9c 100%)',
+  'SDGs朝食':'linear-gradient(135deg,#e67e22 0%,#f39c12 100%)'
+};
+var WD=['日','月','火','水','木','金','土'];
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
+
+function frontFaith(d){
+  var f=FAITH_SCHEDULE[0];
+  for(var i=0;i<FAITH_SCHEDULE.length;i++){ if(FAITH_SCHEDULE[i].day===d){ f=FAITH_SCHEDULE[i]; break; } }
+  return {badge:f.badge||'理念',cat:f.cat||'',title:f.title||'',body:f.body||'',isBreakfast:false,day:f.day||d};
+}
+function bfFaith(d){
+  var b=BFAITH[0];
+  for(var i=0;i<BFAITH.length;i++){ if(BFAITH[i].d===d){ b=BFAITH[i]; break; } }
+  return {badge:b.b||'朝食理念',cat:'',title:b.t||'',body:b.c||'',isBreakfast:true,day:d};
+}
+function bgOf(f){
+  var bg='background:#1a3a6b';
+  if(f.badge==='SDGs'){
+    var i=f.day===29?0:f.day===30?6:12;
+    bg='background:linear-gradient(135deg,'+sdgsColors[i]+' 0%,'+sdgsColors[(i+2)%17]+' 50%,'+sdgsColors[(i+4)%17]+' 100%)';
+  }
+  if(f.badge==='行動'){
+    var k=parseInt((f.cat||'').replace(/[^0-9]/g,''))||1;
+    bg='background:'+(kodoBgMap[k]||kodoBgMap[1]);
+  }
+  if(breakfastBgMap[f.badge]) bg='background:'+breakfastBgMap[f.badge];
+  return bg;
+}
+function cardHtml(f,label){
+  return '<div class="fcard faith-card-anim" style="'+bgOf(f)+'">'
+    +'<div class="hd"><span class="bd">'+esc(f.badge)+(f.isBreakfast?' 🍳':'')+'</span><span class="dt">'+label+'</span></div>'
+    +'<div class="in"><div class="cat">'+esc(f.cat)+'</div><div class="ttl">'+esc(f.title)+'</div><div class="txt">'+esc(f.body)+'</div></div>'
+    +'</div>';
+}
+
+function render(){
+  var d=viewDate.getDate();
+  var label=(viewDate.getMonth()+1)+'月'+d+'日（'+WD[viewDate.getDay()]+'）';
+  var isToday=sameDay(viewDate,new Date());
+  document.getElementById('topDate').textContent=(isToday?'本日 ':'')+label;
+  // index.html と同じ並び：フロントFaith → 朝食の場合は朝食Faithも下に表示
+  var html=cardHtml(frontFaith(d),label);
+  if(dept==='breakfast') html+=cardHtml(bfFaith(d),label);
+  document.getElementById('faithTodayMount').innerHTML=html;
+  document.getElementById('btnToday').disabled=isToday;
+  document.getElementById('segFront').className=dept==='front'?'on':'';
+  document.getElementById('segBf').className=dept==='breakfast'?'on':'';
+  renderList();
+}
+
+function renderList(){
+  var now=new Date(), d=viewDate.getDate();
+  var inThisMonth=(now.getFullYear()===viewDate.getFullYear()&&now.getMonth()===viewDate.getMonth());
+  var rows='';
+  for(var i=1;i<=31;i++){
+    var f=dept==='breakfast'?bfFaith(i):frontFaith(i);
+    var cls='row'+(i===d?' cur':'')+(inThisMonth&&i===now.getDate()?' istoday':'');
+    rows+='<button type="button" class="'+cls+'" onclick="pickDay('+i+')"><span class="d">'+i+'日</span><span class="b">'+esc(f.badge)+'</span><span class="t">'+esc(f.title)+'</span></button>';
+  }
+  document.getElementById('faithList').innerHTML=rows;
+  document.getElementById('listTtl').textContent=(dept==='breakfast'?'朝食':'フロント')+' 1か月のFaith一覧';
+}
+
+function moveDay(n){viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()+n);render();}
+function goToday(){viewDate=new Date();render();}
+function pickDay(i){
+  var last=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,0).getDate();
+  viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),Math.min(i,last));
+  // 月の日数を超える日（例：30日までの月の31日）は内容だけ表示
+  render();
+  if(i>last){
+    var f=cardHtml(frontFaith(i),i+'日の内容');
+    if(dept==='breakfast') f+=cardHtml(bfFaith(i),i+'日の内容');
+    document.getElementById('faithTodayMount').innerHTML=f;
+  }
+  try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){try{window.scrollTo(0,0);}catch(e2){}}
+}
+function setDept(v){dept=v;render();}
+function toggleList(){
+  var l=document.getElementById('faithList'),h=document.getElementById('listHdr');
+  var open=l.classList.toggle('open');
+  h.setAttribute('aria-expanded',open?'true':'false');
+}
+
+function showErr(e){
+  var m=document.getElementById('faithTodayMount');
+  if(m)m.innerHTML='<div class="warn">表示中にエラーが起きました：'+esc(e&&e.message?e.message:e)+'<br>この画面の写真をお送りください。</div>';
+}
+window.onerror=function(msg){showErr(msg);};
+try{ render(); }catch(e){ showErr(e); }
+
+// 日付が変わったら自動更新（今日を表示中のときのみ）
+(function(){
+  var last=new Date().getDate();
+  setInterval(function(){
+    var t=new Date().getDate();
+    if(t!==last){
+      var y=new Date(); y.setDate(y.getDate()-1);
+      var wasToday=sameDay(viewDate,y);
+      last=t;
+      if(wasToday){ viewDate=new Date(); }
+      render();
+    }
+  },60000);
+})();
+</script>
+</body>
+</html>
